@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.PutMappingException;
+import ru.yandex.practicum.filmorate.exception.InvalidOperationException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -13,6 +13,7 @@ import java.util.*;
 @Slf4j
 public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
+    private int filmsNumber;
 
     @GetMapping
     public Map<Integer, Film> getFilms() {
@@ -22,6 +23,10 @@ public class FilmController {
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
         validateFilm(film);
+        if (films.containsKey(film.getId())) {
+            throw new InvalidOperationException("Film's id already created.");
+        }
+        film.setId(++filmsNumber);
         films.put(film.getId(), film);
         log.info("Created new film: " + film);
         return film;
@@ -35,7 +40,7 @@ public class FilmController {
             log.info("Film changed: " + film);
         } else {
             log.warn("Film PUT exception: " + film);
-            throw new PutMappingException("Film id doesn't exists.");
+            throw new InvalidOperationException("Film id doesn't exists.");
         }
         return film;
     }
@@ -48,7 +53,7 @@ public class FilmController {
             if (film.getDescription().length() > Film.MAX_DESCRIPTION_LENGTH) {
                 throw new ValidationException("Film description is too long.");
             }
-            if (film.getReleaseDate().isBefore(Film.MIN_RELEASE_DATE)) {
+            if (film.getReleaseDate().isBefore(Film.FILMS_BIRTHDAY)) {
                 throw new ValidationException("Film release date is before 28.12.1895");
             }
             if (film.getDuration().isNegative()) {

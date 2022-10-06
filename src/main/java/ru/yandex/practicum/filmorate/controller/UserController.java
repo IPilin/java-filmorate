@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.PutMappingException;
+import ru.yandex.practicum.filmorate.exception.InvalidOperationException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -16,6 +16,7 @@ import java.util.Map;
 public class UserController {
 
     private final Map<Integer, User> users = new HashMap<>();
+    private int usersNumber;
 
     @GetMapping
     public Map<Integer, User> getUsers() {
@@ -25,6 +26,10 @@ public class UserController {
     @PostMapping
     public User createUser(@RequestBody User user) {
         validateUser(user);
+        if (users.containsKey(user.getId())) {
+            throw new InvalidOperationException("User's id already created.");
+        }
+        user.setId(++usersNumber);
         users.put(user.getId(), user);
         log.info("Created new user: " + user);
         return user;
@@ -38,7 +43,7 @@ public class UserController {
             log.info("User changed: " + user);
         } else {
             log.warn("User PUT exception: " + user);
-            throw new PutMappingException("User doesn't exists.");
+            throw new InvalidOperationException("User doesn't exists.");
         }
         return user;
     }
@@ -51,7 +56,7 @@ public class UserController {
             if (user.getLogin().isBlank()) {
                 throw new ValidationException("User login is blank.");
             }
-            if (user.getName().isBlank()) {
+            if (user.getName() == null || user.getName().isBlank()) {
                 user.setName(user.getLogin());
             }
             if (user.getBirthday().isAfter(LocalDate.now())) {

@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -22,16 +21,12 @@ public class FilmControllerTest {
 
     @Test
     public void shouldThrowExceptionIfNameIsBlank() {
-        Assertions.assertAll(() -> {
-            Assertions.assertEquals(film, filmController.createFilm(film));
+        assertAll(() -> {
+            assertEquals(film, filmController.createFilm(film));
             film.setName("");
-            Assertions.assertThrows(ValidationException.class, () -> {
-                filmController.createFilm(film);
-            });
+            assertThrows(ValidationException.class, () -> filmController.createFilm(film));
             film.setName("   ");
-            Assertions.assertThrows(ValidationException.class, () -> {
-                filmController.createFilm(film);
-            });
+            assertThrows(ValidationException.class, () -> filmController.createFilm(film));
         });
     }
 
@@ -40,13 +35,34 @@ public class FilmControllerTest {
         var builder = new StringBuilder();
         builder.setLength(200);
         film.setDescription(builder.toString());
-        Assertions.assertAll(() -> {
-            Assertions.assertEquals(film, filmController.createFilm(film));
+        assertAll(() -> {
+            assertEquals(film, filmController.createFilm(film));
             builder.setLength(201);
             film.setDescription(builder.toString());
-            Assertions.assertThrows(ValidationException.class, () -> {
-                filmController.createFilm(film);
-            });
+            assertThrows(ValidationException.class, () -> filmController.createFilm(film));
+            builder.setLength(1000);
+            film.setDescription(builder.toString());
+            assertThrows(ValidationException.class, () -> filmController.createFilm(film));
+        });
+    }
+
+    @Test
+    public void shouldThrowExceptionIfReleaseDateIsTooYoung() {
+        assertAll(() -> {
+            film.setReleaseDate(Film.FILMS_BIRTHDAY.minusDays(1));
+            assertThrows(ValidationException.class, () -> filmController.createFilm(film));
+            film.setReleaseDate(Film.FILMS_BIRTHDAY);
+            assertEquals(film, filmController.createFilm(film));
+        });
+    }
+
+    @Test
+    public void shouldThrowExceptionIfDurationIsNegative() {
+        assertAll(() -> {
+            film.setDuration(Duration.ZERO.minusNanos(1));
+            assertThrows(ValidationException.class, () -> filmController.createFilm(film));
+            film.setDuration(Duration.ZERO);
+            assertEquals(film, filmController.createFilm(film));
         });
     }
 }
