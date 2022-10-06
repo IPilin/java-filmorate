@@ -11,6 +11,9 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 public class Film {
+    public static final int MAX_DESCRIPTION_LENGTH = 200;
+    public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+
     private int id;
     private String name;
     private String description;
