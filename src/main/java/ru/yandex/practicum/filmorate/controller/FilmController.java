@@ -1,18 +1,20 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.InvalidOperationException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new ConcurrentHashMap<>();
     private int filmsNumber;
 
     @GetMapping
@@ -21,7 +23,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film createFilm(@RequestBody Film film) {
+    public Film createFilm(@RequestBody Film film) throws InvalidOperationException {
         validateFilm(film);
         if (films.containsKey(film.getId())) {
             throw new InvalidOperationException("Film's id already created.");
@@ -33,7 +35,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film changeFilm(@RequestBody Film film) {
+    public Film changeFilm(@RequestBody Film film) throws InvalidOperationException {
         if (films.containsKey(film.getId())) {
             validateFilm(film);
             films.put(film.getId(), film);
@@ -47,16 +49,16 @@ public class FilmController {
 
     private void validateFilm(Film film) {
         try {
-            if (film.getName().isBlank()) {
+            if (!StringUtils.hasText(film.getName())) {
                 throw new ValidationException("Film name is blank.");
             }
-            if (film.getDescription().length() > Film.MAX_DESCRIPTION_LENGTH) {
+            if (film.getDescription() != null && film.getDescription().length() > Film.MAX_DESCRIPTION_LENGTH) {
                 throw new ValidationException("Film description is too long.");
             }
-            if (film.getReleaseDate().isBefore(Film.FILMS_BIRTHDAY)) {
+            if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(Film.FILMS_BIRTHDAY)) {
                 throw new ValidationException("Film release date is before 28.12.1895");
             }
-            if (film.getDuration().isNegative()) {
+            if (film.getDuration() == null || film.getDuration().isNegative()) {
                 throw new ValidationException("Film duration is negative.");
             }
         } catch (ValidationException e) {

@@ -25,39 +25,49 @@ public class UserControllerTest {
 
     @Test
     public void shouldThrowExceptionIfEmailWrong() {
-        assertAll(() -> {
-            user.setEmail(" ");
-            assertThrows(ValidationException.class, () -> userController.createUser(user));
-            user.setEmail("ya.ru");
-            assertThrows(ValidationException.class, () -> userController.createUser(user));
-        });
+        assertAll(
+                () -> {
+                    user.setEmail(" ");
+                    assertThrows(ValidationException.class, () -> userController.createUser(user));
+                },
+                () -> {
+                    user.setEmail("ya.ru");
+                    assertThrows(ValidationException.class, () -> userController.createUser(user));
+                }
+        );
     }
 
     @Test
     public void shouldThrowExceptionIfLoginIsBlank() {
-        assertAll(() -> {
-            user.setLogin("");
-            assertThrows(ValidationException.class, () -> userController.createUser(user));
-            user.setEmail("       ");
-            assertThrows(ValidationException.class, () -> userController.createUser(user));
-        });
+        assertAll(
+                () -> {
+                    user.setLogin("");
+                    assertThrows(ValidationException.class, () -> userController.createUser(user));
+                },
+                () -> {
+                    user.setEmail("       ");
+                    assertThrows(ValidationException.class, () -> userController.createUser(user));
+                }
+        );
     }
 
     @Test
     public void shouldRenameIfNameIsBlank() {
-        assertAll(() -> {
-            user.setName("");
-            assertEquals(user.getLogin(), userController.createUser(user).getName());
-            user.setName("          ");
-            assertEquals(user.getLogin(), userController.changeUser(user).getName());
-        });
+        assertAll(
+                () -> {
+                    user.setName("");
+                    assertEquals(user.getLogin(), userController.createUser(user).getName());
+                },
+                () -> {
+                    user.setName("          ");
+                    assertEquals(user.getLogin(), userController.changeUser(user).getName());
+                }
+        );
     }
 
     @Test
     public void shouldThrowExceptionIfBirthDayIsWrong() {
-        assertAll(() -> {
-            user.setBirthday(LocalDate.now().plusDays(1));
-            assertThrows(ValidationException.class, () -> userController.createUser(user));
-        });
+        user.setBirthday(LocalDate.now().plusDays(1));
+        assertThrows(ValidationException.class, () -> userController.createUser(user));
     }
 }
