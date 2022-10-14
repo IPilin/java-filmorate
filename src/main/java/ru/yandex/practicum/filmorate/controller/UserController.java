@@ -1,71 +1,54 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.InvalidOperationException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 
-import java.time.LocalDate;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
+    private final UserService userService;
 
-    private final Map<Integer, User> users = new ConcurrentHashMap<>();
-    private int usersNumber;
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public Map<Integer, User> getUsers() {
-        return users;
+        return userService.getUsers();
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) throws InvalidOperationException {
-        validateUser(user);
-        if (users.containsKey(user.getId())) {
-            throw new InvalidOperationException("User's id already created.");
-        }
-        user.setId(++usersNumber);
-        users.put(user.getId(), user);
-        log.info("Created new user: " + user);
-        return user;
+    public User createUser(@RequestBody User user) throws IncorrectIdException {
+        return userService.createUser(user);
     }
 
     @PutMapping
-    public User changeUser(@RequestBody User user) throws InvalidOperationException {
-        if (users.containsKey(user.getId())) {
-            validateUser(user);
-            users.put(user.getId(), user);
-            log.info("User changed: " + user);
-        } else {
-            log.warn("User PUT exception: " + user);
-            throw new InvalidOperationException("User doesn't exists.");
-        }
-        return user;
+    public User changeUser(@RequestBody User user) throws IncorrectIdException {
+        return userService.changeUser(user);
     }
 
-    private void validateUser(User user) {
-        try {
-            if (!StringUtils.hasText(user.getEmail()) || !user.getEmail().contains("@")) {
-                throw new ValidationException("User email is blank or wrong.");
-            }
-            if (!StringUtils.hasText(user.getLogin())) {
-                throw new ValidationException("User login is blank.");
-            }
-            if (!StringUtils.hasText(user.getName())) {
-                user.setName(user.getLogin());
-            }
-            if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
-                throw new ValidationException("User birthday in future.");
-            }
-        } catch (ValidationException e) {
-            log.warn("User validate exception: " + user);
-            throw e;
-        }
+    @GetMapping("/{userId}")
+    public User getUser(@PathVariable("userId") int userId) throws IncorrectIdException {
+        return userService.getUser(userId);
+    }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public void addFriend(@PathVariable("userId") int userId,
+                          @PathVariable("friendId") int friendId) throws IncorrectIdException {
+        userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void deleteFriend(@PathVariable("userId") int userId,
+                             @PathVariable("friendId") int friendId) throws IncorrectIdException {
+        userService.removeFriend(userId, friendId);
     }
 }

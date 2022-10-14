@@ -5,6 +5,8 @@ import lombok.Data;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -17,4 +19,5 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private Duration duration;
+    private final Set<User> likes = new HashSet<>();
 }
