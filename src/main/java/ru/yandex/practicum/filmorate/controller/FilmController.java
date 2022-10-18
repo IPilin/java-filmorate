@@ -20,7 +20,7 @@ public class FilmController {
     }
 
     @GetMapping
-    public Map<Integer, Film> getFilms() {
+    public Collection<Film> getFilms() {
         return filmService.getFilms();
     }
 
@@ -37,5 +37,23 @@ public class FilmController {
     @GetMapping("/{filmId}")
     public Film getFilm(@PathVariable("filmId") int filmId) throws IncorrectIdException {
         return filmService.getFilm(filmId);
+    }
+
+    @PutMapping("/{filmId}/like/{userId}")
+    public void addLike(@PathVariable("filmId") int filmId,
+                        @PathVariable("userId") int userId) throws IncorrectIdException {
+        filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public void removeLike(@PathVariable("filmId") int filmId,
+                           @PathVariable("userId") int userId) throws IncorrectIdException {
+        filmService.removeLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(
+            @RequestParam(value = "count", defaultValue = "10", required = false) int count) {
+        return filmService.getPopular(count);
     }
 }

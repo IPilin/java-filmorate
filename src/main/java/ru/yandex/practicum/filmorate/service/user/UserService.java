@@ -11,7 +11,8 @@ import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,23 +25,16 @@ public class UserService {
         this.users = users;
     }
 
-    public Map<Integer, User> getUsers() {
+    public Collection<User> getUsers() {
         return users.getAll();
     }
 
     public User getUser(int id) throws IncorrectIdException {
-        var user = users.get(id);
-        if (user == null) {
-            throw new IncorrectIdException("Incorrect user ID");
-        }
-        return user;
+        return users.get(id);
     }
 
     public User createUser(User user) throws IncorrectIdException {
         validateUser(user);
-        if (users.contains(user.getId())) {
-            throw new IncorrectIdException("User's id already created.");
-        }
         user.setId(nextId++);
         users.add(user);
         log.info("Created new user: " + user);
@@ -48,14 +42,9 @@ public class UserService {
     }
 
     public User changeUser(User user) throws IncorrectIdException {
-        if (users.contains(user.getId())) {
-            validateUser(user);
-            users.add(user);
-            log.info("User changed: " + user);
-        } else {
-            log.warn("User PUT exception: " + user);
-            throw new IncorrectIdException("User doesn't exists.");
-        }
+        validateUser(user);
+        users.update(user);
+        log.info("User changed: " + user);
         return user;
     }
 
@@ -65,14 +54,9 @@ public class UserService {
         }
         var user = users.get(userId);
         var friend = users.get(friendId);
-        if (user == null) {
-            throw new IncorrectIdException("Incorrect user ID.");
-        }
-        if (friend == null) {
-            throw new IncorrectIdException("Incorrect friend ID.");
-        }
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+
+        user.getFriends().add(friend);
+        friend.getFriends().add(user);
     }
 
     public void removeFriend(int userId, int friendId) throws IncorrectIdException {
@@ -81,14 +65,17 @@ public class UserService {
         }
         var user = users.get(userId);
         var friend = users.get(friendId);
-        if (user == null) {
-            throw new IncorrectIdException("Incorrect user ID.");
-        }
-        if (friend == null) {
-            throw new IncorrectIdException("Incorrect friend ID.");
-        }
-        user.getFriends().remove(friendId);
-        user.getFriends().remove(userId);
+
+        user.getFriends().remove(friend);
+        friend.getFriends().remove(user);
+    }
+
+    public Collection<User> getCommonFriends(int userId, int otherId) throws IncorrectIdException {
+        var user = users.get(userId);
+        var other = users.get(otherId);
+        return user.getFriends().stream()
+                .filter(friend -> friend.getFriends().stream().anyMatch(u -> u.equals(other)))
+                .collect(Collectors.toSet());
     }
 
     private void validateUser(User user) {

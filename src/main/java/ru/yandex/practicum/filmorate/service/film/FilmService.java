@@ -7,39 +7,36 @@ import org.springframework.util.StringUtils;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.exception.ValidationException;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
-import java.util.Map;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService {
     private final FilmStorage films;
+    private final UserService userService;
     private int nextId = 1;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage films) {
+    public FilmService(InMemoryFilmStorage films, UserService userService) {
         this.films = films;
+        this.userService = userService;
     }
 
-    public Map<Integer, Film> getFilms() {
+    public Collection<Film> getFilms() {
         return films.getAll();
     }
 
     public Film getFilm(int id) throws IncorrectIdException {
-        var film = films.get(id);
-        if (film == null) {
-            throw new IncorrectIdException("Incorrect film ID.");
-        }
-        return film;
+        return films.get(id);
     }
 
     public Film createFilm(Film film) throws IncorrectIdException {
         validateFilm(film);
-        if (films.contains(film.getId())) {
-            throw new IncorrectIdException("Film's id already created.");
-        }
         film.setId(nextId++);
         films.add(film);
         log.info("Created new film: " + film);
@@ -47,15 +44,25 @@ public class FilmService {
     }
 
     public Film changeFilm(Film film) throws IncorrectIdException {
-        if (films.contains(film.getId())) {
-            validateFilm(film);
-            films.add(film);
-            log.info("Film changed: " + film);
-        } else {
-            log.warn("Film PUT exception: " + film);
-            throw new IncorrectIdException("Film id doesn't exists.");
-        }
+        validateFilm(film);
+        films.update(film);
+        log.info("Film changed: " + film);
         return film;
+    }
+
+    public void addLike(int filmId, int userId) throws IncorrectIdException {
+        films.get(filmId).getLikes().add(userService.getUser(userId));
+    }
+
+    public void removeLike(int filmId, int userId) throws IncorrectIdException {
+        films.get(filmId).getLikes().remove(userService.getUser(userId));
+    }
+
+    public Collection<Film> getPopular(int count) {
+        return films.getAll().stream()
+                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private void validateFilm(Film film) {
@@ -69,7 +76,7 @@ public class FilmService {
             if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(Film.FILMS_BIRTHDAY)) {
                 throw new ValidationException("Film release date is before 28.12.1895");
             }
-            if (film.getDuration() == null || film.getDuration().isNegative()) {
+            if (film.getDuration() <= 0) {
                 throw new ValidationException("Film duration is negative.");
             }
         } catch (ValidationException e) {

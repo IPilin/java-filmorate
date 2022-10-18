@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
-import java.util.Map;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/users")
@@ -21,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Map<Integer, User> getUsers() {
+    public Collection<User> getUsers() {
         return userService.getUsers();
     }
 
@@ -40,6 +40,11 @@ public class UserController {
         return userService.getUser(userId);
     }
 
+    @GetMapping("/{userId}/friends")
+    public Collection<User> getUserFriends(@PathVariable("userId") int userId) throws IncorrectIdException {
+        return userService.getUser(userId).getFriends();
+    }
+
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable("userId") int userId,
                           @PathVariable("friendId") int friendId) throws IncorrectIdException {
@@ -50,5 +55,11 @@ public class UserController {
     public void deleteFriend(@PathVariable("userId") int userId,
                              @PathVariable("friendId") int friendId) throws IncorrectIdException {
         userService.removeFriend(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable("userId") int userId,
+                                             @PathVariable("otherId") int otherId) throws IncorrectIdException {
+        return userService.getCommonFriends(userId, otherId);
     }
 }
