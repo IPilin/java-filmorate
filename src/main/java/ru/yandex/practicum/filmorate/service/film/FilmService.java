@@ -36,7 +36,11 @@ public class FilmService {
 
     public Film createFilm(Film film) throws IncorrectIdException {
         validateFilm(film);
-        film.setId(nextId++);
+        film.setId(getNextId());
+        if (films.contains(film.getId())) {
+            log.warn("Add film error: " + film);
+            throw new IncorrectIdException("Film already exists.");
+        }
         films.add(film);
         log.info("Created new film: " + film);
         return film;
@@ -79,5 +83,9 @@ public class FilmService {
             log.warn("Film validate exception: " + film);
             throw e;
         }
+    }
+
+    private int getNextId() {
+        return nextId++;
     }
 }

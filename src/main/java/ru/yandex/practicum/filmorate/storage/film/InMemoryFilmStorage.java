@@ -16,11 +16,7 @@ import java.util.stream.Collectors;
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new ConcurrentHashMap<>();
 
-    public void add(Film film) throws IncorrectIdException {
-        if (contains(film.getId())) {
-            log.warn("Add film error: " + film);
-            throw new IncorrectIdException("Film already exists.");
-        }
+    public void add(Film film) {
         films.put(film.getId(), film);
     }
 
