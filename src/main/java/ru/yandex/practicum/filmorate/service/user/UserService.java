@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -30,21 +29,23 @@ public class UserService {
     }
 
     public User getUser(int id) throws IncorrectIdException {
-        return users.get(id);
+        return users.find(id);
     }
 
     public User createUser(User user) throws IncorrectIdException {
         validateUser(user);
-        user.setId(nextId++);
+        user.setId(getNextId());
+        if (users.contains(user.getId())) {
+            log.warn("Add user error: " + user);
+            throw new IncorrectIdException("User already exists.");
+        }
         users.add(user);
-        log.info("Created new user: " + user);
         return user;
     }
 
     public User changeUser(User user) throws IncorrectIdException {
         validateUser(user);
         users.update(user);
-        log.info("User changed: " + user);
         return user;
     }
 
@@ -52,30 +53,18 @@ public class UserService {
         if (userId == friendId) {
             throw new IncorrectIdException("You can't be friends with yourself :(");
         }
-        var user = users.get(userId);
-        var friend = users.get(friendId);
-
-        user.getFriends().add(friend);
-        friend.getFriends().add(user);
+        users.addFriend(userId, friendId);
     }
 
     public void removeFriend(int userId, int friendId) throws IncorrectIdException {
         if (userId == friendId) {
             throw new IncorrectIdException("You can't not be friends with yourself :(");
         }
-        var user = users.get(userId);
-        var friend = users.get(friendId);
-
-        user.getFriends().remove(friend);
-        friend.getFriends().remove(user);
+        users.removeFriend(userId, friendId);
     }
 
     public Collection<User> getCommonFriends(int userId, int otherId) throws IncorrectIdException {
-        var user = users.get(userId);
-        var other = users.get(otherId);
-        return user.getFriends().stream()
-                .filter(friend -> friend.getFriends().stream().anyMatch(u -> u.equals(other)))
-                .collect(Collectors.toSet());
+        return users.getCommonFriends(userId, otherId);
     }
 
     private void validateUser(User user) {
@@ -96,5 +85,9 @@ public class UserService {
             log.warn("User validate exception: " + user);
             throw e;
         }
+    }
+
+    private int getNextId() {
+        return nextId++;
     }
 }

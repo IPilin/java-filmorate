@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,7 +31,7 @@ public class FilmService {
     }
 
     public Film getFilm(int id) throws IncorrectIdException {
-        return films.get(id);
+        return films.find(id);
     }
 
     public Film createFilm(Film film) throws IncorrectIdException {
@@ -51,18 +50,15 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) throws IncorrectIdException {
-        films.get(filmId).getLikes().add(userService.getUser(userId));
+        films.addLike(filmId, userService.getUser(userId));
     }
 
     public void removeLike(int filmId, int userId) throws IncorrectIdException {
-        films.get(filmId).getLikes().remove(userService.getUser(userId));
+        films.removeLike(filmId, userService.getUser(userId));
     }
 
     public Collection<Film> getPopular(int count) {
-        return films.getAll().stream()
-                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        return films.getPopular(count);
     }
 
     private void validateFilm(Film film) {
