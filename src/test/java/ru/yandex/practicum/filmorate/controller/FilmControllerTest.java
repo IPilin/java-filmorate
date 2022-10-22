@@ -3,10 +3,13 @@ package ru.yandex.practicum.filmorate.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-import java.time.Duration;
 import java.time.LocalDate;
 
 public class FilmControllerTest {
@@ -15,8 +18,8 @@ public class FilmControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController();
-        film = new Film(0, "Avengers", "d", LocalDate.now(), Duration.ofHours(2));
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new UserService(new InMemoryUserStorage())));
+        film = new Film(0, "Avengers", "d", LocalDate.now(), 100);
     }
 
     @Test
@@ -76,11 +79,11 @@ public class FilmControllerTest {
     public void shouldThrowExceptionIfDurationIsNegative() {
         assertAll(
                 () -> {
-                    film.setDuration(Duration.ZERO.minusNanos(1));
+                    film.setDuration(0);
                     assertThrows(ValidationException.class, () -> filmController.createFilm(film));
                 },
                 () -> {
-                    film.setDuration(Duration.ZERO);
+                    film.setDuration(-120);
                     assertEquals(film, filmController.createFilm(film));
                 }
         );

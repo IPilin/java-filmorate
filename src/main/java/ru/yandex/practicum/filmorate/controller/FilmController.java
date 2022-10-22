@@ -1,69 +1,59 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.InvalidOperationException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/films")
-@Slf4j
 public class FilmController {
-    private final Map<Integer, Film> films = new ConcurrentHashMap<>();
-    private int filmsNumber;
+
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
-    public Map<Integer, Film> getFilms() {
-        return films;
+    public Collection<Film> getFilms() {
+        return filmService.getFilms();
     }
 
     @PostMapping
-    public Film createFilm(@RequestBody Film film) throws InvalidOperationException {
-        validateFilm(film);
-        if (films.containsKey(film.getId())) {
-            throw new InvalidOperationException("Film's id already created.");
-        }
-        film.setId(++filmsNumber);
-        films.put(film.getId(), film);
-        log.info("Created new film: " + film);
-        return film;
+    public Film createFilm(@RequestBody Film film) throws IncorrectIdException {
+        return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film changeFilm(@RequestBody Film film) throws InvalidOperationException {
-        if (films.containsKey(film.getId())) {
-            validateFilm(film);
-            films.put(film.getId(), film);
-            log.info("Film changed: " + film);
-        } else {
-            log.warn("Film PUT exception: " + film);
-            throw new InvalidOperationException("Film id doesn't exists.");
-        }
-        return film;
+    public Film changeFilm(@RequestBody Film film) throws IncorrectIdException {
+        return filmService.changeFilm(film);
     }
 
-    private void validateFilm(Film film) {
-        try {
-            if (!StringUtils.hasText(film.getName())) {
-                throw new ValidationException("Film name is blank.");
-            }
-            if (film.getDescription() != null && film.getDescription().length() > Film.MAX_DESCRIPTION_LENGTH) {
-                throw new ValidationException("Film description is too long.");
-            }
-            if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(Film.FILMS_BIRTHDAY)) {
-                throw new ValidationException("Film release date is before 28.12.1895");
-            }
-            if (film.getDuration() == null || film.getDuration().isNegative()) {
-                throw new ValidationException("Film duration is negative.");
-            }
-        } catch (ValidationException e) {
-            log.warn("Film validate exception: " + film);
-            throw e;
-        }
+    @GetMapping("/{filmId}")
+    public Film getFilm(@PathVariable("filmId") int filmId) throws IncorrectIdException {
+        return filmService.getFilm(filmId);
+    }
+
+    @PutMapping("/{filmId}/like/{userId}")
+    public void addLike(@PathVariable("filmId") int filmId,
+                        @PathVariable("userId") int userId) throws IncorrectIdException {
+        filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public void removeLike(@PathVariable("filmId") int filmId,
+                           @PathVariable("userId") int userId) throws IncorrectIdException {
+        filmService.removeLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(
+            @RequestParam(value = "count", defaultValue = "10", required = false) int count) {
+        return filmService.getPopular(count);
     }
 }
