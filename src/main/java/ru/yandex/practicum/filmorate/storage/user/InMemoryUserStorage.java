@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Integer, User> users = new ConcurrentHashMap<>();
+    private final Map<Long, User> users = new ConcurrentHashMap<>();
 
     public void add(User user) {
         users.put(user.getId(), user);
@@ -29,7 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("User changed: " + user);
     }
 
-    public User find(int id) throws IncorrectIdException {
+    public User find(long id) throws IncorrectIdException {
         if (!contains(id)) {
             log.warn("User get error: " + id);
             throw new IncorrectIdException("User not found.");
@@ -41,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
         return users.values();
     }
 
-    public void addFriend(int userId, int friendId) throws IncorrectIdException {
+    public void addFriend(long userId, long friendId) throws IncorrectIdException {
         var user = find(userId);
         var friend = find(friendId);
 
@@ -49,7 +49,7 @@ public class InMemoryUserStorage implements UserStorage {
         friend.getFriends().add(user);
     }
 
-    public void removeFriend(int userId, int friendId) throws IncorrectIdException {
+    public void removeFriend(long userId, long friendId) throws IncorrectIdException {
         var user = find(userId);
         var friend = find(friendId);
 
@@ -57,7 +57,7 @@ public class InMemoryUserStorage implements UserStorage {
         friend.getFriends().remove(user);
     }
 
-    public Collection<User> getCommonFriends(int user1, int user2) throws IncorrectIdException {
+    public Collection<User> getCommonFriends(long user1, long user2) throws IncorrectIdException {
         var user = find(user1);
         var other = find(user2);
         return user.getFriends().stream()
@@ -65,7 +65,7 @@ public class InMemoryUserStorage implements UserStorage {
                 .collect(Collectors.toSet());
     }
 
-    public boolean contains(int id) {
+    public boolean contains(long id) {
         return users.containsKey(id);
     }
 }

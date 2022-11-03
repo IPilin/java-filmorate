@@ -8,8 +8,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.exception.ValidationException;
 import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.Collection;
 
@@ -21,7 +21,7 @@ public class FilmService {
     private int nextId = 1;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage films, UserService userService) {
+    public FilmService(FilmDbStorage films, UserService userService) {
         this.films = films;
         this.userService = userService;
     }

@@ -49,21 +49,21 @@ public class UserService {
         return user;
     }
 
-    public void addFriend(int userId, int friendId) throws IncorrectIdException {
+    public void addFriend(long userId, long friendId) throws IncorrectIdException {
         if (userId == friendId) {
             throw new IncorrectIdException("You can't be friends with yourself :(");
         }
         users.addFriend(userId, friendId);
     }
 
-    public void removeFriend(int userId, int friendId) throws IncorrectIdException {
+    public void removeFriend(long userId, long friendId) throws IncorrectIdException {
         if (userId == friendId) {
             throw new IncorrectIdException("You can't not be friends with yourself :(");
         }
         users.removeFriend(userId, friendId);
     }
 
-    public Collection<User> getCommonFriends(int userId, int otherId) throws IncorrectIdException {
+    public Collection<User> getCommonFriends(long userId, long otherId) throws IncorrectIdException {
         return users.getCommonFriends(userId, otherId);
     }
 
