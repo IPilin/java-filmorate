@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
@@ -42,7 +42,7 @@ public class UserController {
 
     @GetMapping("/{userId}/friends")
     public Collection<User> getUserFriends(@PathVariable("userId") int userId) throws IncorrectIdException {
-        return userService.getUser(userId).getFriends();
+        return userService.getFriends(userId);
     }
 
     @PutMapping("/{userId}/friends/{friendId}")

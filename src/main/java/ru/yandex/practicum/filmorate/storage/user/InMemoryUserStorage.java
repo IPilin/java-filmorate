@@ -3,12 +3,14 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 
+import javax.print.attribute.standard.PresentationDirection;
 import java.util.Collection;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -41,28 +43,40 @@ public class InMemoryUserStorage implements UserStorage {
         return users.values();
     }
 
+    public Collection<User> getFriends(long userId) throws IncorrectIdException {
+        var user = find(userId);
+        Set<User> friends = new HashSet<>();
+        for (Long friendId : user.getFriends()) {
+            try {
+                friends.add(find(friendId));
+            } catch (IncorrectIdException ignored) {            }
+        }
+        return friends;
+    }
+
     public void addFriend(long userId, long friendId) throws IncorrectIdException {
         var user = find(userId);
         var friend = find(friendId);
 
-        user.getFriends().add(friend);
-        friend.getFriends().add(user);
+        user.getFriends().add(friend.getId());
+        friend.getFriends().add(user.getId());
     }
 
     public void removeFriend(long userId, long friendId) throws IncorrectIdException {
         var user = find(userId);
         var friend = find(friendId);
 
-        user.getFriends().remove(friend);
-        friend.getFriends().remove(user);
+        user.getFriends().remove(friend.getId());
+        friend.getFriends().remove(user.getId());
     }
 
     public Collection<User> getCommonFriends(long user1, long user2) throws IncorrectIdException {
-        var user = find(user1);
+        /* var user = find(user1);
         var other = find(user2);
         return user.getFriends().stream()
                 .filter(friend -> friend.getFriends().stream().anyMatch(u -> u.equals(other)))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet());*/
+        return null;
     }
 
     public boolean contains(long id) {

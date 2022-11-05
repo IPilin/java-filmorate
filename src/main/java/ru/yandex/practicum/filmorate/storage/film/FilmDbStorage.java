@@ -6,12 +6,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDao;
 import ru.yandex.practicum.filmorate.dao.FilmLikeDao;
 import ru.yandex.practicum.filmorate.dao.impl.FilmGenreDaoImpl;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -19,7 +20,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 @Slf4j
-@Component
+@Repository
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FilmGenreDao filmGenreDao;

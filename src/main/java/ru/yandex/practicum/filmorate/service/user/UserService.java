@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.model.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ public class UserService {
     private int nextId = 1;
 
     @Autowired
-    public UserService(InMemoryUserStorage users) {
+    public UserService(UserDbStorage users) {
         this.users = users;
     }
 
@@ -47,6 +48,10 @@ public class UserService {
         validateUser(user);
         users.update(user);
         return user;
+    }
+
+    public Collection<User> getFriends(long userId) throws IncorrectIdException {
+        return users.getFriends(userId);
     }
 
     public void addFriend(long userId, long friendId) throws IncorrectIdException {
