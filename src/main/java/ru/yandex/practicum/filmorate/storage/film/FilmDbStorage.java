@@ -5,14 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDao;
 import ru.yandex.practicum.filmorate.dao.FilmLikeDao;
-import ru.yandex.practicum.filmorate.dao.impl.FilmGenreDaoImpl;
+import ru.yandex.practicum.filmorate.dao.FilmRatingDao;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -23,15 +22,17 @@ import java.util.Collection;
 @Repository
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final FilmRatingDao filmRatingDao;
     private final FilmGenreDao filmGenreDao;
-
     private final FilmLikeDao filmLikeDao;
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate,
-                         FilmGenreDaoImpl filmGenreDao,
+                         FilmRatingDao filmRatingDao,
+                         FilmGenreDao filmGenreDao,
                          FilmLikeDao filmLikeDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.filmRatingDao = filmRatingDao;
         this.filmGenreDao = filmGenreDao;
         this.filmLikeDao = filmLikeDao;
     }
@@ -62,7 +63,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 Date.valueOf(film.getReleaseDate()),
                 film.getDuration(),
-                film.getRate(),
+                film.getMpa().getId(),
                 film.getId());
         filmGenreDao.insertAllFilmGenre(film);
         filmLikeDao.insertAllFilmLike(film);
@@ -127,9 +128,9 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
-                .rate(rs.getInt("rating_id"))
                 .build();
 
+        film.setMpa(filmRatingDao.find(rs.getInt("rating_id")));
         film.getGenres().addAll(filmGenreDao.findByFilmId(film.getId()));
         film.getLikes().addAll(filmLikeDao.findFilmLikes(film.getId()));
         return film;

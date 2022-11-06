@@ -10,13 +10,12 @@ import ru.yandex.practicum.filmorate.dao.UserFriendDao;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Set;
 import java.util.HashSet;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Repository
@@ -110,22 +109,14 @@ public class UserDbStorage implements UserStorage {
     public Collection<User> getCommonFriends(long user1, long user2) throws IncorrectIdException {
         var userOne = find(user1);
         var userTwo = find(user2);
-        Set<Long> commonFriendsId = userOne.getFriends().stream()
-                .filter(friendId -> {
-                    try {
-                        return find(friendId).getFriends().stream().anyMatch(u -> u == userTwo.getId());
-                    } catch (IncorrectIdException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toSet());
-        commonFriendsId.addAll(userTwo.getFriends().stream()
-                .filter(friendId -> {
-                    try {
-                        return find(friendId).getFriends().stream().anyMatch(u -> u == userOne.getId());
-                    } catch (IncorrectIdException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toSet()));
+        Set<Long> commonFriendsId = new HashSet<>();
+        for (Long i : userOne.getFriends()) {
+            for (Long j : userTwo.getFriends()) {
+                if (Objects.equals(i, j)) {
+                    commonFriendsId.add(i);
+                }
+            }
+        }
         Set<User> result = new HashSet<>();
         for (Long friendId : commonFriendsId) {
             result.add(find(friendId));

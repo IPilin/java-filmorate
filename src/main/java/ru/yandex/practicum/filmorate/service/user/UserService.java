@@ -4,10 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -58,7 +57,7 @@ public class UserService {
         if (userId == friendId) {
             throw new IncorrectIdException("You can't be friends with yourself :(");
         }
-        users.addFriend(userId, friendId);
+        users.addFriend(friendId, userId);
     }
 
     public void removeFriend(long userId, long friendId) throws IncorrectIdException {

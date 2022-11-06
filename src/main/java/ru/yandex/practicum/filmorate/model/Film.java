@@ -22,7 +22,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private int rate;
+    private FilmRating mpa;
     private final Set<FilmGenre> genres = new HashSet<>();
     private final Set<Long> likes = new HashSet<>();
 
@@ -32,7 +32,7 @@ public class Film {
         values.put("description", description);
         values.put("release_date", releaseDate);
         values.put("duration", duration);
-        values.put("rating_id", rate);
+        values.put("rating_id", mpa.getId());
         return values;
     }
 }

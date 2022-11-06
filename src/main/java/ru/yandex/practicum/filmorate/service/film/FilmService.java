@@ -79,6 +79,9 @@ public class FilmService {
             if (film.getDuration() <= 0) {
                 throw new ValidationException("Film duration is negative.");
             }
+            if (film.getMpa() == null || film.getMpa().getId() < 1 || film.getMpa().getId() > 5) {
+                throw new ValidationException("Film mpa is wrong.");
+            }
         } catch (ValidationException e) {
             log.warn("Film validate exception: " + film);
             throw e;
