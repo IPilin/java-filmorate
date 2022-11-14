@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -20,22 +21,12 @@ import java.util.Collection;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FilmRatingDao filmRatingDao;
     private final FilmGenreDao filmGenreDao;
     private final FilmLikeDao filmLikeDao;
-
-    @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate,
-                         FilmRatingDao filmRatingDao,
-                         FilmGenreDao filmGenreDao,
-                         FilmLikeDao filmLikeDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmRatingDao = filmRatingDao;
-        this.filmGenreDao = filmGenreDao;
-        this.filmLikeDao = filmLikeDao;
-    }
 
     @Override
     public void add(Film film) {

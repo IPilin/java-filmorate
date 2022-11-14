@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 
-import javax.print.attribute.standard.PresentationDirection;
 import java.util.Collection;
 import java.util.Set;
 import java.util.HashSet;
@@ -47,9 +46,7 @@ public class InMemoryUserStorage implements UserStorage {
         var user = find(userId);
         Set<User> friends = new HashSet<>();
         for (Long friendId : user.getFriends()) {
-            try {
-                friends.add(find(friendId));
-            } catch (IncorrectIdException ignored) {            }
+            friends.add(find(friendId));
         }
         return friends;
     }
@@ -71,11 +68,6 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public Collection<User> getCommonFriends(long user1, long user2) throws IncorrectIdException {
-        /* var user = find(user1);
-        var other = find(user2);
-        return user.getFriends().stream()
-                .filter(friend -> friend.getFriends().stream().anyMatch(u -> u.equals(other)))
-                .collect(Collectors.toSet());*/
         return null;
     }
 

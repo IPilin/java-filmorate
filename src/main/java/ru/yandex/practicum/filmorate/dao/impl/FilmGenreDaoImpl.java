@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,13 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 @Repository
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmGenreDaoImpl implements FilmGenreDao {
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public FilmGenreDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public FilmGenre find(int id) {
         String sqlQuery = "SELECT * FROM genre WHERE id = ?";

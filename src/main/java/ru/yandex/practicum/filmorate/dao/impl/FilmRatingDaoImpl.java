@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,13 +13,9 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmRatingDaoImpl implements FilmRatingDao {
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public FilmRatingDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public FilmRating find(int id) {

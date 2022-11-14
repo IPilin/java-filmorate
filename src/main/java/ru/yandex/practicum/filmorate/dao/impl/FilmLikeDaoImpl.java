@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -11,13 +12,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Repository
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmLikeDaoImpl implements FilmLikeDao {
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public FilmLikeDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Set<Long> findFilmLikes(long filmId) {

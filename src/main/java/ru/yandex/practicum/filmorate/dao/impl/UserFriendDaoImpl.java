@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -10,13 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Repository
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserFriendDaoImpl implements UserFriendDao {
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public UserFriendDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
     @Override
     public Set<Long> findUserFriends(User user) {
         Set<Long> friends = new HashSet<>();

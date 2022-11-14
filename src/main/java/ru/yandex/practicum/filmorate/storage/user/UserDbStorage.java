@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -19,15 +20,10 @@ import java.util.Set;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserFriendDao userFriendDao;
-
-    @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate, UserFriendDao userFriendDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.userFriendDao = userFriendDao;
-    }
 
     @Override
     public void add(User user) throws IncorrectIdException {
