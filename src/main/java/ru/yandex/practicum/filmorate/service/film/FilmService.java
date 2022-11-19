@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.model.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.Collection;
 
@@ -21,7 +21,7 @@ public class FilmService {
     private int nextId = 1;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage films, UserService userService) {
+    public FilmService(FilmDbStorage films, UserService userService) {
         this.films = films;
         this.userService = userService;
     }
@@ -78,6 +78,9 @@ public class FilmService {
             }
             if (film.getDuration() <= 0) {
                 throw new ValidationException("Film duration is negative.");
+            }
+            if (film.getMpa() == null || film.getMpa().getId() < 1 || film.getMpa().getId() > 5) {
+                throw new ValidationException("Film mpa is wrong.");
             }
         } catch (ValidationException e) {
             log.warn("Film validate exception: " + film);

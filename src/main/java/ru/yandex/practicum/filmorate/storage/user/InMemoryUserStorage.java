@@ -3,17 +3,18 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 
 import java.util.Collection;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Integer, User> users = new ConcurrentHashMap<>();
+    private final Map<Long, User> users = new ConcurrentHashMap<>();
 
     public void add(User user) {
         users.put(user.getId(), user);
@@ -29,7 +30,7 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("User changed: " + user);
     }
 
-    public User find(int id) throws IncorrectIdException {
+    public User find(long id) throws IncorrectIdException {
         if (!contains(id)) {
             log.warn("User get error: " + id);
             throw new IncorrectIdException("User not found.");
@@ -41,31 +42,36 @@ public class InMemoryUserStorage implements UserStorage {
         return users.values();
     }
 
-    public void addFriend(int userId, int friendId) throws IncorrectIdException {
+    public Collection<User> getFriends(long userId) throws IncorrectIdException {
+        var user = find(userId);
+        Set<User> friends = new HashSet<>();
+        for (Long friendId : user.getFriends()) {
+            friends.add(find(friendId));
+        }
+        return friends;
+    }
+
+    public void addFriend(long userId, long friendId) throws IncorrectIdException {
         var user = find(userId);
         var friend = find(friendId);
 
-        user.getFriends().add(friend);
-        friend.getFriends().add(user);
+        user.getFriends().add(friend.getId());
+        friend.getFriends().add(user.getId());
     }
 
-    public void removeFriend(int userId, int friendId) throws IncorrectIdException {
+    public void removeFriend(long userId, long friendId) throws IncorrectIdException {
         var user = find(userId);
         var friend = find(friendId);
 
-        user.getFriends().remove(friend);
-        friend.getFriends().remove(user);
+        user.getFriends().remove(friend.getId());
+        friend.getFriends().remove(user.getId());
     }
 
-    public Collection<User> getCommonFriends(int user1, int user2) throws IncorrectIdException {
-        var user = find(user1);
-        var other = find(user2);
-        return user.getFriends().stream()
-                .filter(friend -> friend.getFriends().stream().anyMatch(u -> u.equals(other)))
-                .collect(Collectors.toSet());
+    public Collection<User> getCommonFriends(long user1, long user2) throws IncorrectIdException {
+        return null;
     }
 
-    public boolean contains(int id) {
+    public boolean contains(long id) {
         return users.containsKey(id);
     }
 }

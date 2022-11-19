@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.exception.IncorrectIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Integer, Film> films = new ConcurrentHashMap<>();
+    private final Map<Long, Film> films = new ConcurrentHashMap<>();
 
     public void add(Film film) {
         films.put(film.getId(), film);
@@ -28,7 +28,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.put(film.getId(), film);
     }
 
-    public Film find(int id) throws IncorrectIdException {
+    public Film find(long id) throws IncorrectIdException {
         if (!contains(id)) {
             log.warn("Film get error: " + id);
             throw new IncorrectIdException("Film not found.");
@@ -47,15 +47,15 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
-    public void addLike(int filmId, User user) throws IncorrectIdException {
-        find(filmId).getLikes().add(user);
+    public void addLike(long filmId, User user) throws IncorrectIdException {
+        find(filmId).getLikes().add(user.getId());
     }
 
-    public void removeLike(int filmId, User user) throws IncorrectIdException {
-        find(filmId).getLikes().remove(user);
+    public void removeLike(long filmId, User user) throws IncorrectIdException {
+        find(filmId).getLikes().remove(user.getId());
     }
 
-    public boolean contains(int id) {
+    public boolean contains(long id) {
         return films.containsKey(id);
     }
 }
